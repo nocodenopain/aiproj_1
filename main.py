@@ -23,7 +23,7 @@ def eval_board(tuple):
     return standard_board[tuple[0]][tuple[1]]
 
 
-# @jit
+@jit
 def out_of_bound(x, y, size):
     if x < 0 or y < 0 or x >= size or y >= size:
         return True
@@ -90,7 +90,7 @@ def updateBoard(board, tile, i, j, checkonly=False):
     return reversed_stone
 
 
-# @jit
+@jit
 def judge(tuple):
     if tuple[0] == 0 and tuple[1] == 0:
         return True
@@ -228,11 +228,23 @@ class AI(object):
     def go(self, chessboard):
         # self.find_position(chessboard)
         global root
+        if self.last is None:
+            root = mcts_node(chessboard, 0, 0, self.color)
+            root.expand()
+        else:
+            flag = False
+            root = self.last
+            for node in root.child:
+                if same(node.chessboard, chessboard, self.chessboard_size):
+                    root = node
+                    flag = True
+            if not flag:
+                self.last = None
+                root = mcts_node(chessboard, 0, 0, self.color)
+                root.expand()
         self.candidate_list = possible_positions(chessboard, self.color, self.chessboard_size)
-        root = mcts_node(chessboard, 0, 0, self.color)
         total_cnt = 1
         start = time.time()
-        root.expand()
         while time.time() - start < 4.5:
             total_cnt += 1
             find_path(root, total_cnt)
