@@ -5,7 +5,7 @@ import math
 import copy
 import time as tt
 import sys
-from numba import jit, cuda
+from numba import jit
 
 sys.setrecursionlimit(30000)
 
