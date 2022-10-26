@@ -240,6 +240,7 @@ class AI(object):
                 if same(node.chessboard, chessboard, self.chessboard_size):
                     root = node
                     total_cnt = root.t
+                    print(total_cnt)
                     flag = True
             if not flag:
                 self.last = None
@@ -251,7 +252,6 @@ class AI(object):
             total_cnt += 1
             find_path(root, total_cnt)
         max = 0
-        print(total_cnt)
         # for c in root.child:
         #     print()
         #     for i in range(0, self.chessboard_size):
@@ -262,6 +262,8 @@ class AI(object):
                 choose = node
                 if not judge(decide(chessboard, choose.chessboard, self.chessboard_size)):
                     self.candidate_list.append(decide(chessboard, choose.chessboard, self.chessboard_size))
+                    self.last = node
+                    print(node.t)
         # for i in range(0, self.chessboard_size):
         #     for j in range(0, self.chessboard_size):
         #         if chessboard[i][j] == 0 and choose.chessboard[i][j] != 0:
