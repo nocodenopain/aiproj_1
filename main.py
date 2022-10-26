@@ -228,6 +228,8 @@ class AI(object):
     def go(self, chessboard):
         # self.find_position(chessboard)
         global root
+        global total_cnt
+        total_cnt = 1
         if self.last is None:
             root = mcts_node(chessboard, 0, 0, self.color)
             root.expand()
@@ -237,13 +239,13 @@ class AI(object):
             for node in root.child:
                 if same(node.chessboard, chessboard, self.chessboard_size):
                     root = node
+                    total_cnt = root.t
                     flag = True
             if not flag:
                 self.last = None
                 root = mcts_node(chessboard, 0, 0, self.color)
                 root.expand()
         self.candidate_list = possible_positions(chessboard, self.color, self.chessboard_size)
-        total_cnt = 1
         start = time.time()
         while time.time() - start < 4.5:
             total_cnt += 1
@@ -266,11 +268,11 @@ class AI(object):
         #             self.candidate_list.append((i, j))
         #             break
 
-        # if len(self.candidate_list) != 0 and judge(self.candidate_list[len(self.candidate_list) - 1]):
-        #     for tp in self.candidate_list:
-        #         if not judge(tp):
-        #             self.candidate_list.append(tp)
-        #             break
+        if len(self.candidate_list) != 0 and judge(self.candidate_list[len(self.candidate_list) - 1]):
+            for tp in self.candidate_list:
+                if not judge(tp):
+                    self.candidate_list.append(tp)
+                    break
 
     def find_position(self, chessboard):
         self.candidate_list.clear()
