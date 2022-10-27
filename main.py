@@ -6,6 +6,7 @@ import copy
 import time as tt
 import sys
 from numba import jit
+from queue import Queue
 
 sys.setrecursionlimit(30000)
 
@@ -150,7 +151,7 @@ def random_race(chessboard, size, color):
                     min = eval_board(tp)
                     ans = tp
             updateBoard(chessboard, -color, ans[0], ans[1])
-            random_race(chessboard, size, color)
+            return random_race(chessboard, size, color)
     else:
         ans = (0, 0)
         min = -1
@@ -159,8 +160,7 @@ def random_race(chessboard, size, color):
                 min = eval_board(tp)
                 ans = tp
         updateBoard(chessboard, color, ans[0], ans[1])
-        random_race(chessboard, size, -color)
-    return True
+        return random_race(chessboard, size, -color)
 
 
 class mcts_node:
@@ -199,7 +199,7 @@ class mcts_node:
         t = self.t
         if self.t == 0:
             t = 0.00000000001
-        return self.s / t + 2 * math.sqrt(2 * math.log(times) / t)
+        return self.s / t + 1.4 * math.sqrt(2 * math.log(times) / t)
 
 
 def same(ch1, ch2, size):
@@ -240,7 +240,6 @@ class AI(object):
                 if same(node.chessboard, chessboard, self.chessboard_size):
                     root = node
                     total_cnt = root.t
-                    print(total_cnt)
                     flag = True
             if not flag:
                 self.last = None
@@ -263,7 +262,6 @@ class AI(object):
                 if not judge(decide(chessboard, choose.chessboard, self.chessboard_size)):
                     self.candidate_list.append(decide(chessboard, choose.chessboard, self.chessboard_size))
                     self.last = node
-                    print(node.t)
         # for i in range(0, self.chessboard_size):
         #     for j in range(0, self.chessboard_size):
         #         if chessboard[i][j] == 0 and choose.chessboard[i][j] != 0:
@@ -337,6 +335,13 @@ def find_path(root, time):
             find_path(choose, time)
 
 
+def printl(chessboard):
+    l = len(chessboard)
+    for i in range(l):
+        print(chessboard[i])
+    print("-----------------")
+
+
 if __name__ == "__main__":
 
     a = AI(8, -1, 5)
@@ -346,11 +351,10 @@ if __name__ == "__main__":
         for j in range(0, 8):
             chessboard[i].append(0)
     #
-    chessboard[3][3] = -1
-    chessboard[3][4] = 1
-    chessboard[4][3] = 1
+    chessboard[3][3] = 1
+    chessboard[3][4] = -1
+    chessboard[4][3] = -1
     chessboard[4][4] = 1
-    chessboard[4][5] = 1
     # for i in range(0, 8):
     #     chessboard[i][i] = 1
     # chessboard[3][4] = -1
@@ -364,4 +368,5 @@ if __name__ == "__main__":
     # ce[6] = [1, 0, 1, -1, -1, 1, -1, -1]
     # ce[7] = [0, 1, 1, 1, 1, 1, 1, -1]
     a.go(chessboard)
+
     print(a.candidate_list[len(a.candidate_list) - 1])
