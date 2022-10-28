@@ -20,6 +20,26 @@ random.seed(0)
 direction = [[0, 1], [1, 1], [1, 0], [1, -1], [0, -1], [-1, -1], [-1, 0], [-1, 1]]
 
 
+def best_choice(tuple):
+    if tuple[0] == 0 and tuple[1] == 1:
+        return True
+    if tuple[0] == 1 and tuple[1] == 0:
+        return True
+    if tuple[0] == 0 and tuple[1] == 6:
+        return True
+    if tuple[0] == 1 and tuple[1] == 7:
+        return True
+    if tuple[0] == 6 and tuple[1] == 0:
+        return True
+    if tuple[0] == 6 and tuple[1] == 7:
+        return True
+    if tuple[0] == 7 and tuple[1] == 1:
+        return True
+    if tuple[0] == 7 and tuple[1] == 6:
+        return True
+    return False
+
+
 def eval_board(tuple):
     return standard_board[tuple[0]][tuple[1]]
 
@@ -172,6 +192,7 @@ class mcts_node:
         self.size = len(chessboard)
         self.color = color
         self.parent = None
+        self.depth = 0
 
     def back_reward(self, color):
         self.t += 1
@@ -181,19 +202,27 @@ class mcts_node:
             self.parent.back_reward(color)
 
     def expand(self):
-        l = possible_positions(self.chessboard, self.color, self.size)
-        if len(l) != 0:
-            for p in l:
-                board = copy.deepcopy(self.chessboard)
-                updateBoard(board, self.color, p[0], p[1])
-                tmp = mcts_node(board, 0, 0, -self.color)
-                self.child.append(tmp)
-                tmp.parent = self
-            return True
-        # else:
-        #     self.color = -self.color
-        #     self.expand()
-        return False
+        if self.depth <= 3:
+            l = possible_positions(self.chessboard, self.color, self.size)
+            if len(l) != 0:
+                for p in l:
+                    board = copy.deepcopy(self.chessboard)
+                    updateBoard(board, self.color, p[0], p[1])
+                    tmp = mcts_node(board, 0, 0, -self.color)
+                    self.child.append(tmp)
+                    tmp.parent = self
+                    tmp.depth = self.depth + 1
+                return True
+            # else:
+            #     self.color = -self.color
+            #     self.expand()
+            return False
+        else:
+            print(1)
+            if random_race(self.chessboard, self.size, self.color):
+                self.back_reward(self.color)
+            else:
+                self.back_reward(-self.color)
 
     def cal_value(self, times):
         t = self.t
@@ -247,9 +276,8 @@ class AI(object):
                 root = mcts_node(chessboard, 0, 0, self.color)
                 root.expand()
         self.candidate_list = possible_positions(chessboard, self.color, self.chessboard_size)
-
         start = time.time()
-        while time.time() - start < 4.5:
+        while time.time() - start < 4.6:
             total_cnt += 1
             find_path(root, total_cnt)
         max = 0
@@ -274,6 +302,12 @@ class AI(object):
             for tp in self.candidate_list:
                 if not judge(tp):
                     self.candidate_list.append(tp)
+                    break
+
+        if len(self.candidate_list) != 0 and not best_choice(self.candidate_list[len(self.candidate_list) - 1]):
+            for tuple in self.candidate_list:
+                if best_choice(tuple):
+                    self.candidate_list.append(tuple)
                     break
 
     def find_position(self, chessboard):
