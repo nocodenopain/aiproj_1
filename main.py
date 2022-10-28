@@ -199,9 +199,10 @@ class mcts_node:
         t = self.t
         if self.t == 0:
             t = 0.00000000001
-        return self.s / t + 1.4 * math.sqrt(2 * math.log(times) / t)
+        return self.s / t + 2 * math.sqrt(2 * math.log(times) / t)
 
 
+# @jit(nopython=True)
 def same(ch1, ch2, size):
     for i in range(0, size):
         for j in range(0, size):
@@ -246,6 +247,7 @@ class AI(object):
                 root = mcts_node(chessboard, 0, 0, self.color)
                 root.expand()
         self.candidate_list = possible_positions(chessboard, self.color, self.chessboard_size)
+
         start = time.time()
         while time.time() - start < 4.5:
             total_cnt += 1
@@ -256,6 +258,7 @@ class AI(object):
         #     for i in range(0, self.chessboard_size):
         #         print(c.chessboard[i])
         for node in root.child:
+            print(node.t)
             if node.s / node.t > max:
                 max = node.s / node.t
                 choose = node
@@ -267,7 +270,6 @@ class AI(object):
         #         if chessboard[i][j] == 0 and choose.chessboard[i][j] != 0:
         #             self.candidate_list.append((i, j))
         #             break
-
         if len(self.candidate_list) != 0 and judge(self.candidate_list[len(self.candidate_list) - 1]):
             for tp in self.candidate_list:
                 if not judge(tp):
